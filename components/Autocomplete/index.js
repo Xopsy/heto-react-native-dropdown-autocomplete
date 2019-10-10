@@ -2,7 +2,6 @@ import React, {Component, Fragment} from "react";
 import {findNodeHandle, ActivityIndicator, TextInput, View} from "react-native";
 import {string, bool, number, func} from "prop-types";
 import Dropdown from "../Dropdown";
-import {capitalizeFirstLetter} from "../../utils/string";
 import {styles} from "./Autocomplete.styles";
 import {get} from "../../utils/api";
 import {WAIT_INTERVAL, NO_DATA} from "../../constants/Autocomplete";
@@ -16,6 +15,7 @@ class Autocomplete extends Component {
       inputValue: props.initialValue || "",
       loading: false,
       filteredItems: [],
+      showModal: false,
     };
     this.mounted = false;
     this.timer = null;
@@ -24,6 +24,7 @@ class Autocomplete extends Component {
     this.setItem = this.setItem.bind(this);
     this.triggerChange = this.triggerChange.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleFocus = this.handleFocus.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
     this.promisifySetState = this.promisifySetState.bind(this);
   }
@@ -123,7 +124,7 @@ class Autocomplete extends Component {
     if (resetOnSelect) {
       this.setState({inputValue: ""});
     } else {
-      const capitalizedValue = capitalizeFirstLetter(valueExtractor(value));
+      const capitalizedValue = valueExtractor(value);
       this.setState({inputValue: capitalizedValue});
     }
   }
@@ -141,16 +142,23 @@ class Autocomplete extends Component {
     this.mounted = false;
   }
 
+  handleFocus(event, scrollToInput) {
+    this.setState({showModal: true});
+    if (scrollToInput) {
+      scrollToInput(findNodeHandle(event.target));
+    }
+  }
+
   handleBlur() {
     clearTimeout(this.timer);
-    this.setState({loading: false});
+    this.setState({loading: false, showModal: false});
     if (this.dropdown.current) {
       this.dropdown.current.close();
     }
   }
 
   render() {
-    const {inputValue, items, loading, filteredItems} = this.state;
+    const {inputValue, items, loading, showModal, filteredItems} = this.state;
     const {
       placeholder,
       scrollToInput,
@@ -184,11 +192,7 @@ class Autocomplete extends Component {
             autoCorrect={autoCorrect}
             keyboardType={keyboardType}
             onChangeText={text => this.handleInputChange(text)}
-            onFocus={event => {
-              if (scrollToInput) {
-                scrollToInput(findNodeHandle(event.target));
-              }
-            }}
+            onFocus={event => this.handleFocus(event, scrollToInput)}
           />
           {loading && (
             <ActivityIndicator
@@ -202,10 +206,11 @@ class Autocomplete extends Component {
           <Dropdown
             ref={this.dropdown}
             dropdownPosition={0}
-            data={data ? filteredItems : items}
+            data={inputValue ? filteredItems : items}
             listHeader={listHeader}
             inputValue={inputValue}
             onChangeValue={this.setItem}
+            showModal={showModal}
             {...dropdownProps}
           />
         )}

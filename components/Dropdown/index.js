@@ -12,7 +12,7 @@ import PropTypes from "prop-types";
 import Ripple from "react-native-material-ripple";
 import DropdownItem from "../DropdownItem";
 import styles from "./Dropdown.styles";
-import {capitalizeFirstLetter, highlightString} from "../../utils/string";
+import {highlightString} from "../../utils/string";
 import {NO_DATA} from "../../constants/Autocomplete";
 import {theme} from "../../constants/Theme";
 import locales from "../../constants/Locales";
@@ -362,7 +362,7 @@ export default class Dropdown extends PureComponent {
         highLightColor || theme.primary,
       );
     } else {
-      text = capitalizeFirstLetter(String(valueExtractor(item)));
+      text = String(valueExtractor(item));
     }
 
     if (item == null) {
@@ -457,7 +457,7 @@ export default class Dropdown extends PureComponent {
           style={[styles.listHeaderText, listHeaderTextStyle]}
           key={listHeader}
         >
-          {listHeader.toUpperCase()}
+          {listHeader}
         </Text>
       </View>
     ) : null;
@@ -473,7 +473,7 @@ export default class Dropdown extends PureComponent {
       ...props
     } = this.props;
 
-    const {data, itemPadding} = props;
+    const {data, itemPadding, showModal} = props;
 
     const {left, top, width, modal} = this.state;
 
@@ -492,9 +492,10 @@ export default class Dropdown extends PureComponent {
 
     const itemData = itemCount ? data : [NO_DATA];
 
+    console.log('TEST - MODAL', showModal, itemData)
     return (
       <View onLayout={this.onLayout} style={containerStyle}>
-        {modal && (
+        {showModal && (
           <View style={[styles.picker, pickerStyle, pickerStyleOverrides]}>
             <FlatList
               keyboardShouldPersistTaps="always"
