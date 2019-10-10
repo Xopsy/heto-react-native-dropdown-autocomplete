@@ -1,1 +1,1 @@
-Fork from --> https://github.com/maxkordiyak/react-native-dropdown-autocomplete
+Forked from --> https://github.com/maxkordiyak/react-native-dropdown-autocomplete
